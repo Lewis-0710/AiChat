@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=AI聊天室
+Comment=AI多成员协作聊天
+Exec=aigroup_desktop
+Icon=aigroup_desktop
+Terminal=false
+Type=Application
+Categories=Utility;Chat;
+StartupWMClass=com.aigroup.aigroup_desktop
