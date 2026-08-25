@@ -18,13 +18,26 @@ class StorageService {
   /// 初始化存储目录
   Future<void> init() async {
     try {
-      final appSupportDir = await getApplicationSupportDirectory();
-      _appDir = Directory(p.join(appSupportDir.path, "aigroup"));
-      if (!await _appDir!.exists()) {
-        await _appDir!.create(recursive: true);
+      Directory? appSupportDir;
+      try {
+        appSupportDir = await getApplicationSupportDirectory();
+      } catch (_) {
+        final user = Platform.environment["USER"];
+        final home = Platform.environment["HOME"] ??
+            (user != null ? "/Users/\$user" : "");
+        if (home.isNotEmpty) {
+          appSupportDir = Directory("\$home/Library/Application Support/com.aigroup.aigroupDesktop");
+        }
       }
-      _membersFile = File(p.join(_appDir!.path, "members.json"));
-      _conversationsFile = File(p.join(_appDir!.path, "conversations.json"));
+
+      if (appSupportDir != null) {
+        _appDir = Directory(p.join(appSupportDir.path, "aigroup"));
+        if (!await _appDir!.exists()) {
+          await _appDir!.create(recursive: true);
+        }
+        _membersFile = File(p.join(_appDir!.path, "members.json"));
+        _conversationsFile = File(p.join(_appDir!.path, "conversations.json"));
+      }
     } catch (_) {}
   }
 
@@ -35,8 +48,14 @@ class StorageService {
     if (file == null || !await file.exists()) return [];
     final content = await file.readAsString();
     if (content.trim().isEmpty) return [];
-    final list = jsonDecode(content) as List;
-    return list.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList();
+    try {
+      final list = jsonDecode(content) as List;
+      return list
+          .map((e) => Member.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
   }
 
   Future<void> saveMembers(List<Member> members) async {
@@ -53,10 +72,14 @@ class StorageService {
     if (file == null || !await file.exists()) return [];
     final content = await file.readAsString();
     if (content.trim().isEmpty) return [];
-    final list = jsonDecode(content) as List;
-    return list
-        .map((e) => Conversation.fromJson(e as Map<String, dynamic>))
-        .toList();
+    try {
+      final list = jsonDecode(content) as List;
+      return list
+          .map((e) => Conversation.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
   }
 
   Future<void> saveConversations(List<Conversation> conversations) async {

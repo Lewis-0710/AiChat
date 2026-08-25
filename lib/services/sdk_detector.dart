@@ -57,6 +57,7 @@ class SdkDetector {
     AiTool.zcode: ['zcode'],
     AiTool.traeCode: ['trae-cn', 'traecli', 'traework', 'trae-work'],
     AiTool.codeBuudy: ['codebuddy', 'codebuudy'],
+    AiTool.deepSeek: ['dsh', 'deepseek'],
   };
 
   /// 各工具的精确候选文件路径
@@ -101,6 +102,14 @@ class SdkDetector {
       '/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy',
       '~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy',
     ],
+    AiTool.deepSeek: [
+      '~/Library/Application Support/DSH Desktop/cli/*/bin/dsh',
+      '~/Library/Application Support/DSH Desktop/cli/*/dsh',
+      '~/.local/bin/dsh',
+      '/opt/homebrew/bin/dsh',
+      '/usr/local/bin/dsh',
+      '<npm-prefix>/bin/dsh',
+    ],
   };
 
   /// 各工具需要作为目录搜索的路径
@@ -108,6 +117,10 @@ class SdkDetector {
     AiTool.codex: ['~/.codemoss/dependencies/codex-sdk/node_modules'],
     AiTool.claude: ['~/.codemoss/dependencies/claude-sdk/node_modules'],
     AiTool.openCode: ['~/.opencode'],
+    AiTool.deepSeek: [
+      '~/Library/Application Support/DSH Desktop/cli',
+      '~/Library/Application Support/DSH Desktop',
+    ],
   };
 
   String? _cachedNpmPrefix;
@@ -189,7 +202,15 @@ class SdkDetector {
     debugPrint('[SdkDetector]   工具: $tool');
     debugPrint('[SdkDetector]   查找文件: $execNames');
 
-    final expandedPath = (await _expandPath(userPath)).trim();
+    var expandedPath = (await _expandPath(userPath)).trim();
+    if (expandedPath.contains('*')) {
+      final matches = await _resolveGlob(expandedPath);
+      for (final match in matches) {
+        final res = await validatePath(match, tool);
+        if (res.found) return res;
+      }
+      return SdkDetectionResult(found: false);
+    }
     debugPrint('[SdkDetector]   展开后: $expandedPath');
 
     if (expandedPath.isEmpty) {
@@ -371,6 +392,32 @@ class SdkDetector {
         final binOpencode = '$basePath/bin/opencode';
         final f = File(binOpencode);
         if (await f.exists()) return binOpencode;
+        return null;
+
+      case AiTool.deepSeek:
+        final candidateDirs = <Directory>[
+          Directory(basePath),
+          Directory('$basePath/cli'),
+        ];
+        for (final dir in candidateDirs) {
+          if (!await dir.exists()) continue;
+          try {
+            await for (final sub in dir.list(followLinks: true)) {
+              if (sub is Directory) {
+                for (final exec in execNames) {
+                  final binPath = '${sub.path}/bin/$exec';
+                  final directPath = '${sub.path}/$exec';
+                  final foundBin = await _checkExecutable(binPath);
+                  if (foundBin != null) return foundBin;
+                  final foundDirect = await _checkExecutable(directPath);
+                  if (foundDirect != null) return foundDirect;
+                }
+              }
+            }
+          } catch (e) {
+            debugPrint('[SdkDetector] deepSeek 扫描异常: $e');
+          }
+        }
         return null;
 
       case AiTool.pi:
@@ -695,9 +742,57 @@ class SdkDetector {
     final npmPrefix = await _getNpmPrefix();
     final expandedPaths = <String>[];
     for (final path in paths) {
-      expandedPaths.add(await _expandPath(path, npmPrefix: npmPrefix));
+      final expanded = await _expandPath(path, npmPrefix: npmPrefix);
+      if (expanded.contains('*')) {
+        final globMatches = await _resolveGlob(expanded);
+        expandedPaths.addAll(globMatches);
+      } else {
+        expandedPaths.add(expanded);
+      }
     }
     return expandedPaths;
+  }
+
+  Future<List<String>> _resolveGlob(String pattern) async {
+    final starIndex = pattern.indexOf('*');
+    if (starIndex == -1) return [pattern];
+
+    final beforeStar = pattern.substring(0, starIndex);
+    final afterStar = pattern.substring(starIndex + 1);
+
+    final lastSlash = beforeStar.lastIndexOf('/');
+    final baseDir = lastSlash != -1 ? beforeStar.substring(0, lastSlash) : beforeStar;
+    final prefix = lastSlash != -1 ? beforeStar.substring(lastSlash + 1) : '';
+
+    final slashAfter = afterStar.startsWith('/') ? afterStar.substring(1) : afterStar;
+
+    final dir = Directory(baseDir);
+    if (!await dir.exists()) {
+      return [];
+    }
+
+    final results = <String>[];
+    try {
+      await for (final entity in dir.list(followLinks: true)) {
+        final entityName = entity.uri.pathSegments.where((s) => s.isNotEmpty).last;
+        if (prefix.isNotEmpty && !entityName.startsWith(prefix)) {
+          continue;
+        }
+        final candidatePath = slashAfter.isNotEmpty
+            ? '${entity.path}/$slashAfter'
+            : entity.path;
+
+        if (candidatePath.contains('*')) {
+          final nested = await _resolveGlob(candidatePath);
+          results.addAll(nested);
+        } else {
+          results.add(candidatePath);
+        }
+      }
+    } catch (e) {
+      debugPrint('[SdkDetector] _resolveGlob 异常: $e');
+    }
+    return results;
   }
 
   Future<String?> _getNpmPrefix() async {

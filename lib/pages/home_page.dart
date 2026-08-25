@@ -482,6 +482,8 @@ class _HomePageState extends State<HomePage> {
       case AiTool.traeCode:
       case AiTool.codeBuudy:
         return [const Color(0xFF00BCD4), const Color(0xFF2979FF)];
+      case AiTool.deepSeek:
+        return [const Color(0xFF4D6BFE), const Color(0xFF2563EB)];
     }
   }
 
@@ -1227,8 +1229,9 @@ class _HomePageState extends State<HomePage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Tooltip(
-                      message:
-                          "跳转到第 ${index + 1} 条消息: ${_truncate(userMessages[index].content, 24)}",
+                      message: userMessages[index].content.trim().isNotEmpty
+                          ? _truncate(userMessages[index].content.trim(), 30)
+                          : (userMessages[index].imageDatas.isNotEmpty ? "[图片]" : "用户消息"),
                       child: MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(

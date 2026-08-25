@@ -8,7 +8,8 @@ enum AiTool {
   cursor('Cursor'),
   zcode('Zcode'),
   traeCode('TraeCode'),
-  codeBuudy('CodeBuudy');
+  codeBuudy('CodeBuudy'),
+  deepSeek('DeepSeek');
 
   final String label;
   const AiTool(this.label);

@@ -135,7 +135,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 先滚动到最顶部（第一条旧提问）
-      final firstDot = find.byTooltip("跳转到第 1 条消息: 第一条旧提问");
+      final firstDot = find.byTooltip("第一条旧提问");
       expect(firstDot, findsOneWidget);
       await tester.tap(firstDot);
       await tester.pumpAndSettle();
@@ -253,7 +253,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. 点击第3个圆点（直接向下跨越2篇巨大长文跳转到第3条）
-      final thirdDot = find.byTooltip("跳转到第 3 条消息: 这是第3条用户提问");
+      final thirdDot = find.byTooltip("这是第3条用户提问");
       expect(thirdDot, findsOneWidget);
 
       await tester.tap(thirdDot);
@@ -270,7 +270,7 @@ void main() {
       );
 
       // 2. 点击第1个圆点（向上跨越长文回滚到第1条）
-      final firstDot = find.byTooltip("跳转到第 1 条消息: 这是第1条用户提问");
+      final firstDot = find.byTooltip("这是第1条用户提问");
       expect(firstDot, findsOneWidget);
 
       await tester.tap(firstDot);
@@ -287,7 +287,7 @@ void main() {
       );
 
       // 3. 再次点击第2个圆点
-      final secondDot = find.byTooltip("跳转到第 2 条消息: 这是第2条用户提问");
+      final secondDot = find.byTooltip("这是第2条用户提问");
       expect(secondDot, findsOneWidget);
 
       await tester.tap(secondDot);

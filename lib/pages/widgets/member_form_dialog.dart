@@ -229,9 +229,14 @@ class _MemberFormDialogState extends State<MemberFormDialog> {
     }
   }
 
-  String get _providerUrlHint => _selectedAccessType == AccessType.anthropic
-      ? ProviderDefaults.anthropic
-      : ProviderDefaults.openai;
+  String get _providerUrlHint {
+    if (_selectedTool == AiTool.deepSeek) {
+      return ProviderDefaults.deepseek;
+    }
+    return _selectedAccessType == AccessType.anthropic
+        ? ProviderDefaults.anthropic
+        : ProviderDefaults.openai;
+  }
 
   Widget _buildAiToolSelector() {
     return _buildDropdown<AiTool>(

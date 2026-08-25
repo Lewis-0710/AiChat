@@ -387,6 +387,8 @@ class MemberManagementPage extends StatelessWidget {
       case AiTool.traeCode:
       case AiTool.codeBuudy:
         return [const Color(0xFF00BCD4), const Color(0xFF2979FF)];
+      case AiTool.deepSeek:
+        return [const Color(0xFF4D6BFE), const Color(0xFF2563EB)];
     }
   }
 

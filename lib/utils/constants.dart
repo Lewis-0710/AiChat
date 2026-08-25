@@ -2,6 +2,7 @@
 class ProviderDefaults {
   static const String openai = 'https://api.openai.com/v1';
   static const String anthropic = 'https://api.anthropic.com';
+  static const String deepseek = 'https://api.deepseek.com';
 }
 
 /// SDK 默认搜索路径（按平台）
@@ -32,6 +33,7 @@ class AiToolExecutables {
     'zcode': ['zcode'],
     'traeCode': ['trae-cn'],
     'codeBuudy': ['codebuudy'],
+    'deepSeek': ['dsh', 'deepseek'],
   };
 }
 
