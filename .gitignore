@@ -1,9 +1,20 @@
-# Miscellaneous
+# Miscellaneous & OS
 *.class
 *.log
 *.pyc
 *.swp
+*.bak
+*.tmp
+*~
 .DS_Store
+.DS_Store?
+._*
+**/.DS_Store
+**/.DS_Store?
+**/._*
+Thumbs.db
+ehthumbs.db
+
 .atom/
 .build/
 .buildlog/
@@ -12,25 +23,32 @@
 .swiftpm/
 migrate_working_dir/
 
+# Build & Dist Artifacts
+/build/
+dist/
+*.dmg
+*.zip
+*.tar.gz
+*.pkg
+*.app
+
 # IntelliJ related
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
+**/macos/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
 /coverage/
 
 # Symbolication related
