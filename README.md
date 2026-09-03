@@ -18,6 +18,14 @@
 
 ---
 
+## 📸 界面预览
+
+<p align="center">
+  <img src="docs/images/chat.png" alt="AI聊天室多成员协同对话界面" width="85%" />
+</p>
+
+---
+
 ## 📖 项目简介
 
 **AI聊天室** 是一个专为桌面端（macOS / Windows / Linux）打造的多 AI 协同对话应用。打破单一模型交互限制，支持在同一个会话中组合接入 DeepSeek、Claude、OpenAI (Codex)、Cursor、TraeCode、Zcode 等多款主流 AI 工具与模型，实现智能自动接力应答、多轮协同推理与跨模型协同工作。
